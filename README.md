@@ -1,0 +1,2 @@
+# EmbedRankKorean
+EmbedRank for Korean
