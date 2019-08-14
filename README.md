@@ -236,6 +236,37 @@ Why not put knives in the dishwasher?
 __label__food-safety __label__baking __label__bread __label__equipment __label__substitutions
 ```
 
+파라미터 정리
+
+| parameter         | description                                      | default   |
+|-------------------|--------------------------------------------------|-----------|
+| input             | training file path                               | mandatory |
+| output            | output file path                                 | mandatory |
+| verbose           | verbosity level                                  | 2         |
+| minCount          | minimal number of word occurences                | 5         |
+| minCountLabel     | minimal number of label occurences               | 0         |
+| wordNgrams        | max length of word ngram                         | 1         |
+| bucket            | number of buckets                                | 2000000   |
+| minn              | min length of char ngram                         | 3         |
+| maxn              | max length of char ngram                         | 6         |
+| t                 | sampling threshold                               | 0.0001    |
+| label             | labels prefix                                    | []        |
+| lr                | learning rate                                    | 0.05      |
+| lrUpdateRate      | change the rate of updates for the learning rate | 100       |
+| dim               | size of word vectors                             | 100       |
+| ws                | size of the context window                       | 5         |
+| epoch             | number of epochs                                 | 5         |
+| neg               | number of negatives sampled                      | 5         |
+| loss              | loss function {ns, hs, softmax}                  | ns        |
+| thread            | number of threads                                | 12        |
+| pretrainedVectors | pretrained word vectors for supervised learning  | []        |
+| saveOutput        | whether output params should be saved            | 0         |
+| cutoff            | number of words and ngrams to retain             | 0         |
+| retrain           | finetune embeddings if a cutoff is applied       | 0         |
+| qnorm             | quantizing the norm separately                   | 0         |
+| qout              | quantizing the classifier                        | 0         |
+| dsub              | size of each sub-vector                          | 2         |
+
 fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지원하기에 상품 속성 추출에도 적용할만 합니다.
 
 보다 많은 자료는 [여기](https://github.com/facebookresearch/fastText/tree/master/docs) 에서 확인할 수 있습니다.
