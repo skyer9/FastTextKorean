@@ -178,3 +178,60 @@ vi input.txt
 
 khaiii --input input.txt
 ```
+
+## 사용법
+
+### fasttext 사용법
+
+데이타 준비
+
+```sh
+cd ~/fastText
+mkdir mywork
+cp ~/embedding/mywork/processed/corrected_ratings_corpus.txt mywork/
+```
+
+```sh
+cd mywork
+
+# using cbow
+../fasttext cbow -input corrected_ratings_corpus.txt -output model_cbow
+
+# using skipgram
+../fasttext skipgram -input corrected_ratings_corpus.txt -output model_skipgram
+
+# print vector
+echo “디즈니” | ../fasttext print-word-vectors model_skipgram.bin
+
+# nearest neighbors
+echo “디즈니” | ../fasttext nn model_skipgram.bin
+```
+
+Text Classification 을 위한 학습데이타를 다운받는다.
+
+```sh
+wget https://dl.fbaipublicfiles.com/fasttext/data/cooking.stackexchange.tar.gz
+tar xvzf cooking.stackexchange.tar.gz
+head cooking.stackexchange.txt
+
+# 데이타셋 분리
+head -n 12404 cooking.stackexchange.txt > cooking.train
+tail -n 3000 cooking.stackexchange.txt > cooking.test
+```
+
+```sh
+../fasttext supervised -input cooking.train -output model_cooking
+```
+
+```sh
+../fasttext predict model_cooking.bin -
+Which baking dish is best to bake a banana bread ?
+__label__baking
+^C
+
+../fasttext predict model_cooking.bin - 5
+Why not put knives in the dishwasher?
+__label__food-safety __label__baking __label__bread __label__equipment __label__substitutions
+```
+
+보다 많은 자료는 [여기](https://github.com/facebookresearch/fastText/tree/master/docs) 에서 확인할 수 있다.
