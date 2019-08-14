@@ -4,7 +4,7 @@
 
 **아래 메뉴얼은 AWS EC2 r4.large 인스턴스에서 테스트되었습니다.**
 
-Embedding 에 대한 기초지식은 [여기](https://ratsgo.github.io/embedding/) 가 좋다. 인터넷 전체를 구글링하는것보다 여기 블로그를 찾는 것이 낫다.
+Embedding 에 대한 기초지식은 [여기](https://ratsgo.github.io/embedding/) 가 좋습니다. 인터넷 전체를 구글링하는것보다 여기 블로그를 찾는 것이 낫습니다.
 
 ### 개발환경 구성
 
@@ -31,7 +31,7 @@ sudo apt install cmake
 
 ### fasttext 설치
 
-fasttext 를 컴파일한다.
+fasttext 를 컴파일합니다.
 
 ``` sh
 cd ~/
@@ -40,7 +40,7 @@ cd fastText
 make
 ```
 
-python 모듈을 설치한다.
+python 모듈을 설치합니다.
 
 ```sh
 pip3 install .
@@ -64,7 +64,7 @@ git clone https://github.com/ratsgo/embedding.git
 cd embedding
 ```
 
-[구글 드라이브](https://drive.google.com/file/d/1kUecR7xO7bsHFmUI6AExtY5u2XXlObOG/view) 에서 전처리가 끝난 데이타를 다운받는다.
+[구글 드라이브](https://drive.google.com/file/d/1kUecR7xO7bsHFmUI6AExtY5u2XXlObOG/view) 에서 전처리가 끝난 데이타를 다운받습니다.
 
 ```sh
 vi ~/bin/gdrive_download
@@ -98,7 +98,7 @@ chmod 700 ~/bin/gdrive_download
 ~/bin/gdrive_download https://drive.google.com/file/d/1kUecR7xO7bsHFmUI6AExtY5u2XXlObOG
 ```
 
-모델을 학습하고, 데이타를 형태소분석 한다.
+모델을 학습하고, 데이타를 형태소분석 합니다.
 
 ```sh
 mkdir mywork
@@ -150,7 +150,7 @@ cd mywork
 
 ### khaiii 설치
 
-[문서](https://github.com/kakao/khaiii/wiki/%EB%B9%8C%EB%93%9C-%EB%B0%8F-%EC%84%A4%EC%B9%98) 를 참조하여 khaiii 를 설치한다.
+[문서](https://github.com/kakao/khaiii/wiki/%EB%B9%8C%EB%93%9C-%EB%B0%8F-%EC%84%A4%EC%B9%98) 를 참조하여 khaiii 를 설치합니다.
 
 ```sh
 cd ~/
@@ -236,6 +236,6 @@ Why not put knives in the dishwasher?
 __label__food-safety __label__baking __label__bread __label__equipment __label__substitutions
 ```
 
-fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지원하기에 상품 속성 추출에도 적용할만 하다.
+fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지원하기에 상품 속성 추출에도 적용할만 합니다.
 
-보다 많은 자료는 [여기](https://github.com/facebookresearch/fastText/tree/master/docs) 에서 확인할 수 있다.
+보다 많은 자료는 [여기](https://github.com/facebookresearch/fastText/tree/master/docs) 에서 확인할 수 있습니다.
