@@ -133,7 +133,7 @@ cd mywork
                     -input ./ratings_tokenized.txt \
                     -output model \
                     -minCount 8 \
-                    -dim 700 \
+                    -dim 100 \
                     -epoch 9 \
                     -lr 0.2 \
                     -wordNgrams 2 \
@@ -143,9 +143,7 @@ cd mywork
                     -t 0.000005 \
                     -dropoutK 4 \
                     -minCountLabel 20 \
-                    -bucket 4000000 \
-                    -maxVocabSize 750000 \
-                    -numCheckPoints 10
+                    -maxVocabSize 50000
 ```
 
 ### khaiii 설치
