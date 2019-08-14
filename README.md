@@ -236,6 +236,6 @@ Why not put knives in the dishwasher?
 __label__food-safety __label__baking __label__bread __label__equipment __label__substitutions
 ```
 
-fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지웒기에 상품 속성 추출에도 적용할만 하다.
+fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지원하기에 상품 속성 추출에도 적용할만 하다.
 
 보다 많은 자료는 [여기](https://github.com/facebookresearch/fastText/tree/master/docs) 에서 확인할 수 있다.
