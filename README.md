@@ -4,6 +4,8 @@
 
 **아래 메뉴얼은 AWS EC2 r4.large 인스턴스에서 테스트되었습니다.**
 
+Embedding 에 대한 기초지식은 [여기](https://ratsgo.github.io/embedding/) 가 좋다. 인터넷 전체를 구글링하는것보다 여기 블로그를 찾는 것이 낫다.
+
 ### 개발환경 구성
 
 ```sh
@@ -233,5 +235,7 @@ __label__baking
 Why not put knives in the dishwasher?
 __label__food-safety __label__baking __label__bread __label__equipment __label__substitutions
 ```
+
+fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지웒기에 상품 속성 추출에도 적용할만 하다.
 
 보다 많은 자료는 [여기](https://github.com/facebookresearch/fastText/tree/master/docs) 에서 확인할 수 있다.
