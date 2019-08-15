@@ -1,4 +1,4 @@
-# EmbedRankKorean
+# fastText for Korean
 
 ## 설치
 
