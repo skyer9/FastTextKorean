@@ -116,34 +116,12 @@ python3 ../preprocess/unsupervised_nlputils.py --preprocess_mode soy_tokenize \
     --input_path ./processed/corrected_ratings_corpus.txt \
     --model_path ./soyword.model \
     --output_path ./ratings_tokenized.txt
-```
 
-### sent2vec 모델 생성
-
-```sh
-cd ~/
-git clone https://github.com/epfml/sent2vec.git
-cd sent2vec
-make
-
-mkdir mywork
-cp ~/embedding/mywork/ratings_tokenized.txt ./mywork/
-cd mywork
-../fasttext sent2vec \
-                    -input ./ratings_tokenized.txt \
-                    -output model \
-                    -minCount 8 \
-                    -dim 100 \
-                    -epoch 9 \
-                    -lr 0.2 \
-                    -wordNgrams 2 \
-                    -loss ns \
-                    -neg 10 \
-                    -thread 20 \
-                    -t 0.000005 \
-                    -dropoutK 4 \
-                    -minCountLabel 20 \
-                    -maxVocabSize 50000
+head -5 ./ratings_tokenized.txt
+어릴때 보고 지금 다시 봐도 재밌 어ㅋㅋ
+디자인을 배우 는 학생 으로, 외국 디자이너와 그들 이 일군 전통을 통해 발전 해가는 문화 산업이 부러웠는데. 사실 우리나라 에서도 그 어려운 시절에 끝까지 열정 을 지킨 노라노 같은 전통이있어 저와 같은 사람들이 꿈을 꾸고 이뤄나갈 수 있다 는 것에 감사합니다.
+폴리스스토리 시리즈는 1부터 뉴까지 버릴께 하나 도 없음. . 최고 .
+와.. 연기 가 진짜 개쩔구나.. 지루 할거라고 생각 했는데 몰입 해서 봤다. . 그래 이런 게 진짜 영화 지
 ```
 
 ### khaiii 설치
@@ -179,11 +157,46 @@ vi input.txt
 khaiii --input input.txt
 ```
 
+아래 명령으로 python 연동모듈을 설치할 수 있습니다.
+
+```sh
+make package_python
+cd package_python
+pip3 install .
+```
+
+### mecab-ko 설치
+
+```sh
+# mecab-ko
+wget https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz
+tar xvfz mecab-0.996-ko-0.9.2.tar.gz
+cd mecab-0.996-ko-0.9.2
+./configure --prefix=/usr
+make
+make check
+sudo make install
+
+# mecab-ko-dic
+sudo ldconfig
+ldconfig -p | grep /usr/local/lib
+cd ~/
+wget https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz
+tar xvfz mecab-ko-dic-2.1.1-20180720.tar.gz
+cd mecab-ko-dic-2.1.1-20180720
+./configure --prefix=/usr
+make
+sudo make install
+
+# mecab-python
+pip3 install python-mecab-ko
+```
+
 ## 사용법
 
 ### fasttext 사용법
 
-데이타 준비
+#### 데이타 준비
 
 ```sh
 cd ~/fastText
@@ -193,6 +206,8 @@ cp ~/embedding/mywork/processed/corrected_ratings_corpus.txt mywork/
 
 ```sh
 cd mywork
+
+#### 형태소분석 없는 데이타로 학습
 
 # using cbow
 ../fasttext cbow -input corrected_ratings_corpus.txt -output model_cbow
@@ -264,6 +279,153 @@ __label__food-safety __label__baking __label__bread __label__equipment __label__
 | qnorm             | quantizing the norm separately                   | 0         |
 | qout              | quantizing the classifier                        | 0         |
 | dsub              | size of each sub-vector                          | 2         |
+
+#### 형태소분석 진행한 데이타로 학습(soy_tokenize)
+
+```sh
+cd ~/fastText/mywork/
+cp ~/embedding/mywork/ratings_tokenized.txt mywork/
+```
+
+```sh
+cd mywork
+
+#### 형태소분석 진행한 데이타로 학습
+../fasttext skipgram -input ratings_tokenized.txt -output model_skipgram
+
+# print vector
+echo “디즈니” | ../fasttext print-word-vectors model_skipgram.bin
+
+# nearest neighbors
+echo “디즈니” | ../fasttext nn model_skipgram.bin
+Query word? 디즈니 0.994381
+픽사 0.720645
+애니메이션 0.703237
+애니중 0.690123
+애니의 0.677468
+웍스 0.676697
+애니를 0.675644
+애니 0.674097
+매이션 0.662758
+에니메이션 0.661454
+```
+
+#### 형태소분석 진행한 데이타로 학습(khaiii)
+
+```sh
+vi unsupervised_nlputils.py
+```
+
+```python
+import sys, math, argparse, re
+from khaiii import KhaiiiApi
+
+def khaiii_tokenize(corpus_fname, output_fname):
+    api = KhaiiiApi()
+
+    with open(corpus_fname, 'r', encoding='utf-8') as f1, \
+            open(output_fname, 'w', encoding='utf-8') as f2:
+        for line in f1:
+            sentence = line.replace('\n', '').strip()
+            tokens = api.analyze(sentence)
+            tokenized_sent = ''
+            for token in tokens:
+                tokenized_sent += ' '.join([str(m) for m in token.morphs]) + ' '
+            f2.writelines(tokenized_sent.strip() + '\n')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--preprocess_mode', type=str, help='preprocess mode')
+    parser.add_argument('--input_path', type=str, help='Location of input files')
+    parser.add_argument('--output_path', type=str, help='Location of output files')
+    args = parser.parse_args()
+
+    if args.preprocess_mode == "khaiii_tokenize":
+        khaiii_tokenize(args.input_path, args.output_path)
+```
+
+```sh
+python3 ./unsupervised_nlputils.py --preprocess_mode khaiii_tokenize \
+    --input_path ./corrected_ratings_corpus.txt \
+    --output_path ./ratings_tokenized.txt
+
+../fasttext skipgram -input ratings_tokenized.txt -output model_skipgram
+
+echo “디즈니/NNP” | ../fasttext nn model_skipgram.bin
+```
+
+#### 형태소분석 진행한 데이타로 학습(mecab-ko)
+
+```sh
+vi unsupervised_nlputils.py
+```
+
+```python
+import sys, math, argparse, re
+from khaiii import KhaiiiApi
+import mecab
+
+def khaiii_tokenize(corpus_fname, output_fname):
+    api = KhaiiiApi()
+
+    with open(corpus_fname, 'r', encoding='utf-8') as f1, \
+            open(output_fname, 'w', encoding='utf-8') as f2:
+        for line in f1:
+            sentence = line.replace('\n', '').strip()
+            tokens = api.analyze(sentence)
+            tokenized_sent = ''
+            for token in tokens:
+                tokenized_sent += ' '.join([str(m) for m in token.morphs]) + ' '
+            f2.writelines(tokenized_sent.strip() + '\n')
+
+
+def mecab_tokenize(corpus_fname, output_fname):
+    mcab = mecab.MeCab()
+
+    with open(corpus_fname, 'r', encoding='utf-8') as f1, \
+            open(output_fname, 'w', encoding='utf-8') as f2:
+        for line in f1:
+            sentence = line.replace('\n', '').strip()
+            tokens = mcab.morphs(sentence)
+            tokenized_sent = ' '.join(tokens)
+            f2.writelines(tokenized_sent + '\n')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--preprocess_mode', type=str, help='preprocess mode')
+    parser.add_argument('--input_path', type=str, help='Location of input files')
+    parser.add_argument('--output_path', type=str, help='Location of output files')
+    args = parser.parse_args()
+
+    if args.preprocess_mode == "khaiii_tokenize":
+        khaiii_tokenize(args.input_path, args.output_path)
+    elif args.preprocess_mode == "mecab_tokenize":
+        mecab_tokenize(args.input_path, args.output_path)
+```
+
+```sh
+python3 ./unsupervised_nlputils.py --preprocess_mode mecab_tokenize \
+    --input_path ./corrected_ratings_corpus.txt \
+    --output_path ./ratings_tokenized.txt
+
+../fasttext skipgram -input ratings_tokenized.txt -output model_skipgram
+
+echo “디즈니” | ../fasttext nn model_skipgram.bin
+Query word? 디즈니 0.996321
+픽사 0.784137
+드림웍스 0.762146
+타잔 0.759206
+애니메 0.732718
+애니 0.718813
+월트 0.702987
+애니메이션 0.702211
+클레이 0.683714
+지브리 0.67412
+```
+
+## 후기
 
 fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지원하기에 상품 속성 추출에도 적용할만 합니다.
 
