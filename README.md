@@ -21,8 +21,8 @@ pip3 install bert
 pip3 install bert-tensorflow
 pip3 install tensorflow
 
-sudo apt install make
-sudo apt-get install build-essential
+# sudo apt install make
+# sudo apt-get install build-essential
 
 sudo apt install unzip
 
@@ -47,9 +47,7 @@ pip3 install .
 ```
 
 ```sh
-mkdir ~/bin
-cp fasttext ~/bin/
-~/bin/fasttext -help
+./fasttext -help
 ```
 
 ### 데이타 전처리
@@ -67,6 +65,7 @@ cd embedding
 [구글 드라이브](https://drive.google.com/file/d/1kUecR7xO7bsHFmUI6AExtY5u2XXlObOG/view) 에서 전처리가 끝난 데이타를 다운받습니다.
 
 ```sh
+mkdir -p ~/bin
 vi ~/bin/gdrive_download
 
 -----------------------------------------
@@ -169,6 +168,7 @@ pip3 install .
 
 ```sh
 # mecab-ko
+cd ~/
 wget https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz
 tar xvfz mecab-0.996-ko-0.9.2.tar.gz
 cd mecab-0.996-ko-0.9.2
@@ -206,9 +206,11 @@ cp ~/embedding/mywork/processed/corrected_ratings_corpus.txt mywork/
 
 ```sh
 cd mywork
+```
 
 #### 형태소분석 없는 데이타로 학습
 
+```sh
 # using cbow
 ../fasttext cbow -input corrected_ratings_corpus.txt -output model_cbow
 
