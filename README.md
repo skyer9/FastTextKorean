@@ -114,9 +114,9 @@ python3 ../preprocess/unsupervised_nlputils.py --preprocess_mode compute_soy_wor
 python3 ../preprocess/unsupervised_nlputils.py --preprocess_mode soy_tokenize \
     --input_path ./processed/corrected_ratings_corpus.txt \
     --model_path ./soyword.model \
-    --output_path ./ratings_tokenized.txt
+    --output_path ./ratings_tokenized_soy.txt
 
-head -5 ./ratings_tokenized.txt
+head -5 ./ratings_tokenized_soy.txt
 어릴때 보고 지금 다시 봐도 재밌 어ㅋㅋ
 디자인을 배우 는 학생 으로, 외국 디자이너와 그들 이 일군 전통을 통해 발전 해가는 문화 산업이 부러웠는데. 사실 우리나라 에서도 그 어려운 시절에 끝까지 열정 을 지킨 노라노 같은 전통이있어 저와 같은 사람들이 꿈을 꾸고 이뤄나갈 수 있다 는 것에 감사합니다.
 폴리스스토리 시리즈는 1부터 뉴까지 버릴께 하나 도 없음. . 최고 .
@@ -217,11 +217,18 @@ cd mywork
 # using skipgram
 ../fasttext skipgram -input corrected_ratings_corpus.txt -output model_skipgram
 
-# print vector
-echo “디즈니” | ../fasttext print-word-vectors model_skipgram.bin
-
 # nearest neighbors
 echo “디즈니” | ../fasttext nn model_skipgram.bin
+Query word? 디즈니 0.968521
+디즈니는 0.956993
+디즈니와 0.934998
+디즈니의 0.920893
+클레이 0.8961
+디즈니가 0.889897
+함정 0.871816
+레전드. 0.864659
+쌍벽을 0.86439
+걸작중 0.859125
 ```
 
 Text Classification 을 위한 학습데이타를 다운받는다.
@@ -230,6 +237,16 @@ Text Classification 을 위한 학습데이타를 다운받는다.
 wget https://dl.fbaipublicfiles.com/fasttext/data/cooking.stackexchange.tar.gz
 tar xvzf cooking.stackexchange.tar.gz
 head cooking.stackexchange.txt
+__label__sauce __label__cheese How much does potato starch affect a cheese sauce recipe?
+__label__food-safety __label__acidity Dangerous pathogens capable of growing in acidic environments
+__label__cast-iron __label__stove How do I cover up the white spots on my cast iron stove?
+__label__restaurant Michelin Three Star Restaurant; but if the chef is not there
+__label__knife-skills __label__dicing Without knife skills, how can I quickly and accurately dice vegetables?
+__label__storage-method __label__equipment __label__bread What\'s the purpose of a bread box?
+__label__baking __label__food-safety __label__substitutions __label__peanuts how to seperate peanut oil from roasted peanuts at home?
+__label__chocolate American equivalent for British chocolate terms
+__label__baking __label__oven __label__convection Fan bake vs bake
+__label__sauce __label__storage-lifetime __label__acidity __label__mayonnaise Regulation and balancing of readymade packed mayonnaise and other sauces
 
 # 데이타셋 분리
 head -n 12404 cooking.stackexchange.txt > cooking.train
@@ -249,6 +266,7 @@ __label__baking
 ../fasttext predict model_cooking.bin - 5
 Why not put knives in the dishwasher?
 __label__food-safety __label__baking __label__bread __label__equipment __label__substitutions
+^C
 ```
 
 파라미터 정리
@@ -286,78 +304,30 @@ __label__food-safety __label__baking __label__bread __label__equipment __label__
 
 ```sh
 cd ~/fastText/mywork/
-cp ~/embedding/mywork/ratings_tokenized.txt mywork/
+cp ~/embedding/mywork/ratings_tokenized_soy.txt ./
 ```
 
 ```sh
 cd mywork
 
 #### 형태소분석 진행한 데이타로 학습
-../fasttext skipgram -input ratings_tokenized.txt -output model_skipgram
-
-# print vector
-echo “디즈니” | ../fasttext print-word-vectors model_skipgram.bin
+../fasttext skipgram -input ratings_tokenized_soy.txt -output model_skipgram
 
 # nearest neighbors
 echo “디즈니” | ../fasttext nn model_skipgram.bin
-Query word? 디즈니 0.994381
-픽사 0.720645
-애니메이션 0.703237
-애니중 0.690123
-애니의 0.677468
-웍스 0.676697
-애니를 0.675644
-애니 0.674097
-매이션 0.662758
-에니메이션 0.661454
+Query word? 디즈니 0.994486
+픽사 0.707323
+애니메이션 0.70667
+애니중 0.700826
+애니 0.695701
+애니의 0.689524
+웍스 0.678675
+애니를 0.675855
+에니메이션 0.672339
+2D 0.671045
 ```
 
 #### 형태소분석 진행한 데이타로 학습(khaiii)
-
-```sh
-vi unsupervised_nlputils.py
-```
-
-```python
-import sys, math, argparse, re
-from khaiii import KhaiiiApi
-
-def khaiii_tokenize(corpus_fname, output_fname):
-    api = KhaiiiApi()
-
-    with open(corpus_fname, 'r', encoding='utf-8') as f1, \
-            open(output_fname, 'w', encoding='utf-8') as f2:
-        for line in f1:
-            sentence = line.replace('\n', '').strip()
-            tokens = api.analyze(sentence)
-            tokenized_sent = ''
-            for token in tokens:
-                tokenized_sent += ' '.join([str(m) for m in token.morphs]) + ' '
-            f2.writelines(tokenized_sent.strip() + '\n')
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--preprocess_mode', type=str, help='preprocess mode')
-    parser.add_argument('--input_path', type=str, help='Location of input files')
-    parser.add_argument('--output_path', type=str, help='Location of output files')
-    args = parser.parse_args()
-
-    if args.preprocess_mode == "khaiii_tokenize":
-        khaiii_tokenize(args.input_path, args.output_path)
-```
-
-```sh
-python3 ./unsupervised_nlputils.py --preprocess_mode khaiii_tokenize \
-    --input_path ./corrected_ratings_corpus.txt \
-    --output_path ./ratings_tokenized.txt
-
-../fasttext skipgram -input ratings_tokenized.txt -output model_skipgram
-
-echo “디즈니/NNP” | ../fasttext nn model_skipgram.bin
-```
-
-#### 형태소분석 진행한 데이타로 학습(mecab-ko)
 
 ```sh
 vi unsupervised_nlputils.py
@@ -408,26 +378,57 @@ if __name__ == '__main__':
 ```
 
 ```sh
+python3 ./unsupervised_nlputils.py --preprocess_mode khaiii_tokenize \
+    --input_path ./corrected_ratings_corpus.txt \
+    --output_path ./ratings_tokenized_khaiii.txt
+
+head -5 ./ratings_tokenized_khaiii.txt
+어리/VA ㄹ/ETM 때/NNG 보/VV 고/EC 지금/MAG 다/NNG 시/MAG 보/VV 아/EC 도/JX 재미있/VA 어요/EC ㅋㅋ/NNG
+디자인/NNG 을/JKO 배우/VV 는/ETM 학생/NNG 으로/JKB ,/SP 외국/NNG 디자이/NNG 너/NP 와/JKB 그/NP 들/XSN 이/JKS 일/VV 군/NNG 전통/NNG 을/JKO 통하/VV 여/EC 발전/NNG 하/XSV 여/EC 가/VX 는/ETM 문화/NNG 산업/NNG 이/JKS 부럽/VA 었/EP 는데/EC ./SF 사실/MAG 우리나라/NNG 에서/JKB 도/JX 그/MM 어렵/VA ㄴ/ETM 시절/NNG 에/JKB 끝/NNG 까지/JX 열정/NNG 을/JKO 지키/VV ㄴ/ETM 노라노/NNG 같/VA 은/ETM 전통/NNG 이/JKS 있/VV 어/EC 저/NP 와/JKB 같/VA 은/ETM 사람/NNG 들/XSN 이/JKS 꿈/NNG 을/JKO 꾸/VV 고/EC 이루/VV 어/EC 나가/VX ㄹ/ETM 수/NNB 있/VV 다는/ETM 것/NNB 에/JKB 감사/NNG 하/XSV ㅂ니다/EF ./SF
+폴리스스토리/NNG 시리즈/NNG 는/JX 1/SN 부터/JX 뉴/NNG 까지/JX 버리/VV ㄹ께/EC 하나/NR 도/JX 없/VA 음/ETN ../SE 최고/NNG ./SF
+와/IC ./SF ./SE 연기/NNG 가/JKS 진짜/MAG 개쩌/VV ㄹ구나/EF ../SE 지루/XR 하/XSA ㄹ/ETM 거/EC 이/VCP 라고/EC 생각/NNG 하/XSV 였/EP 는데/EC 몰입/NNG 하/XSV 여서/EC 보/VV 았/EP 다/EF ../SE 그래/IC 이런/MM 것/NNB 이/JKS 진짜/NNG 영화지/NNG
+안개/NNG 자욱/XR 하/XSA ㄴ/ETM 밤하늘/NNG 에/JKB 뜨/VV 어/EC 있/VX 는/ETM 초승달/NNG 같/VA 은/ETM 영화/NNG ./SF
+
+../fasttext skipgram -input ratings_tokenized_khaiii.txt -output model_skipgram
+
+echo “디즈니/NNP” | ../fasttext nn model_skipgram.bin
+Query word? 디즈니/NNP 0.991276
+애니/NNP 0.845127
+즈니/NNG 0.832196
+한국애니/NNP 0.809425
+일본애니/NNP 0.806225
+지브리/NNP 0.77295
+드림웍스/NNP 0.756196
+지니/NNP 0.745549
+베니/NNP 0.740033
+쟈니/NNP 0.730029
+```
+
+#### 형태소분석 진행한 데이타로 학습(mecab-ko)
+
+```sh
 python3 ./unsupervised_nlputils.py --preprocess_mode mecab_tokenize \
     --input_path ./corrected_ratings_corpus.txt \
-    --output_path ./ratings_tokenized.txt
+    --output_path ./ratings_tokenized_mecab.txt
 
-../fasttext skipgram -input ratings_tokenized.txt -output model_skipgram
+../fasttext skipgram -input ratings_tokenized_mecab.txt -output model_skipgram
 
 echo “디즈니” | ../fasttext nn model_skipgram.bin
-Query word? 디즈니 0.996321
-픽사 0.784137
-드림웍스 0.762146
-타잔 0.759206
-애니메 0.732718
-애니 0.718813
-월트 0.702987
-애니메이션 0.702211
-클레이 0.683714
-지브리 0.67412
+Query word? 디즈니 0.996115
+픽사 0.77835
+드림웍스 0.761766
+타잔 0.749565
+애니메 0.719357
+애니메이션 0.694092
+애니 0.691668
+월트 0.690366
+클레이 0.678788
+지브리 0.677055
 ```
 
 ## 후기
+
+형태소분석이 많이 중요하군요.
 
 fasttext 는 후기 평점 예측, 고객센터 자동응답, 그리고 멀티 라벨링도 지원하기에 상품 속성 추출에도 적용할만 합니다.
 
