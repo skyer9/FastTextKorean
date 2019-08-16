@@ -1,4 +1,4 @@
-# fastText for Korean
+# FastText for Korean
 
 ## 설치
 
