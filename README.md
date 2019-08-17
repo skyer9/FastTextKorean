@@ -188,6 +188,9 @@ cd mecab-ko-dic-2.1.1-20180720
 make
 sudo make install
 
+# 하드코딩으로 박혀있는 디렉토리 수정
+sed -i -e 's/\/usr\/local/\/usr/g' tools/add-userdic.sh
+
 # mecab-python
 pip3 install python-mecab-ko
 ```
@@ -495,6 +498,111 @@ Query word? 디즈니 0.996115
 ```
 
 `mecab-ko` : 사전파일만 16M 가 넘어서 그런지 꽤 좋은 결과가 나오는군요. 그 와중에 `지브리` 가 나오네요.
+
+## mecab-ko 오분석 처리
+
+mecab-ko 를 형태소 분석기로 정하고 실제 데이타를 분석해 보니 오류가 많이 있습니다.
+
+`파우치`, `셋트` 등이 `파우 치`, `셋 트` 로 분석되어 신조어/외래어에 취약한 모습을 보입니다.
+
+```sh
+cd ~/fastText/mywork/
+vi get_newword.py
+```
+
+```python
+import sys, math, argparse, re
+import mecab
+import hgtk
+
+def word_count(corpus_fname):
+    with open(corpus_fname, 'r', encoding='utf-8') as f:
+        sentences = f.read()
+        words = re.findall("[가-힣]+", sentences)
+
+        # print(words)
+        d = {}
+        for word in words:
+            d[word] = d.get(word, 0) + 1
+
+        # print(d)
+        word_freq = []
+        for key, value in d.items():
+            word_freq.append((value, key))
+
+        # print(word_freq)
+        word_freq.sort(reverse=True)
+        return word_freq
+
+
+def check_morphs(lst, corpus_fname, output_fname, log_fname):
+    mcab = mecab.MeCab()
+
+    with open(corpus_fname, 'r', encoding='utf-8') as f1, \
+         open(output_fname, 'w', encoding='utf-8') as f2, \
+         open(log_fname, 'w', encoding='utf-8') as f3:
+        sentences = f1.read()
+
+        for item in lst:
+            cnt, word = item
+
+            if cnt < 10:
+                continue
+            tokens = mcab.morphs(word)
+            if len(tokens) == 1:
+                continue
+
+            words = re.findall(' '.join(tokens), sentences)
+            if len(words) < (cnt * 0.05):
+                # 형태소 분리된 단어의 빈도수가 분리안된 단어의 빈수도의 5% 미만이면 형태소 분리오류
+                (cho, jung, jong) = hgtk.letter.decompose(word[-1])
+                if 'ㄱ' <= jong <= 'ㅎ':
+                    dic_line = "{},,,,NNP,*,{},{},*,*,*,*,*".format(word, 'T', word)
+                else:
+                    dic_line = "{},,,,NNP,*,{},{},*,*,*,*,*".format(word, 'F', word)
+                # print("{}\t{}\t{}\t{}\t{}".format(word, ' '.join(tokens), cnt, len(words), jong))
+                f2.writelines(dic_line + '\n')
+                f3.writelines("{}\t{}\t{}\t{}".format(word, ' '.join(tokens), cnt, len(words)) + '\n')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_path', type=str, help='Location of input files')
+    parser.add_argument('--output_path', type=str, help='Location of output files')
+    parser.add_argument('--log_path', type=str, help='Location of log files')
+    args = parser.parse_args()
+
+    lst = word_count(args.input_path)
+    # print(lst)
+
+    check_morphs(lst, args.input_path, args.output_path, args.log_path)
+```
+
+```sh
+# item_info.txt 은 상품명을 모아놓은 텍스트파일로 직접 구하셔야 합니다.
+python3 get_newword.py \
+    --input_path item_info.txt \
+    --output_path output.txt \
+    --log_path log.txt
+
+head output.txt
+파우치,,,,NNP,*,F,파우치,*,*,*,*,*
+에코백,,,,NNP,*,T,에코백,*,*,*,*,*
+크로스백,,,,NNP,*,T,크로스백,*,*,*,*,*
+캔들,,,,NNP,*,T,캔들,*,*,*,*,*
+백팩,,,,NNP,*,T,백팩,*,*,*,*,*
+키링,,,,NNP,*,T,키링,*,*,*,*,*
+린넨,,,,NNP,*,T,린넨,*,*,*,*,*
+카드지갑,,,,NNP,*,T,카드지갑,*,*,*,*,*
+발매트,,,,NNP,*,F,발매트,*,*,*,*,*
+정리보관대,,,,NNP,*,F,정리보관대,*,*,*,*,*
+
+cat output.txt >> ~/mecab-ko-dic-2.1.1-20180720/user-dic/nnp.csv
+
+cd ~/mecab-ko-dic-2.1.1-20180720/
+./tools/add-userdic.sh
+sudo make install
+```
 
 ## 후기
 
