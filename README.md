@@ -20,6 +20,7 @@ pip3 install sentencepiece
 pip3 install bert
 pip3 install bert-tensorflow
 pip3 install tensorflow
+pip3 install hgtk
 
 # sudo apt install make
 # sudo apt-get install build-essential
