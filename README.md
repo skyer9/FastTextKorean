@@ -602,6 +602,8 @@ cat output.txt >> ~/mecab-ko-dic-2.1.1-20180720/user-dic/nnp.csv
 
 cd ~/mecab-ko-dic-2.1.1-20180720/
 ./tools/add-userdic.sh
+make clean
+make
 sudo make install
 ```
 
