@@ -609,6 +609,8 @@ sudo make install
 
 **사용자사전 추출을 자동화하기 위해 몇시간 고민해 보았지만, 어차피 사람이 눈으로 확인을 해야 한다는 결론이 나오는군요.**
 
+다른 방식으로 접근해 봤는데요. 키워드는 고객검색어를 이용하는게 가장 낫다는 생각이 드네요.
+
 ```sh
 python3 ~/embedding/preprocess/unsupervised_nlputils.py \
     --preprocess_mode compute_soy_word_score \
