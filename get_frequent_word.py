@@ -59,38 +59,20 @@ def check_morphs(lst, corpus_fname, output_fname, log_fname):
         for item in lst:
             cnt, word = item
 
-            if cnt < 10 or len(word) == 1:
+            if cnt < 100 or len(word) == 1:
                 continue
 
             tokens = mcab.morphs(word)
             if len(tokens) == 1:
                 continue
 
-            soy_tokens = soy_tokenizer.tokenize(word)
-            if ' '.join(tokens) == ' '.join(soy_tokens):
-                continue
-
-            if is_all_nng(mcab.pos(word)):
-                #print("nouns only : {}".format(word))
-                #print("{}\t{}\t{}\t{}".format(word, ' '.join(tokens), ' '.join(soy_tokens), cnt))
-                continue
-
-            if len(soy_tokens) > 1:
-                continue
-
-            #print("{}\t{}\t{}\t{}".format(word, ' '.join(tokens), ' '.join(soy_tokens), cnt))
-
-            words = re.findall(' '.join(tokens), sentences)
-            if len(words) < (cnt * 0.05):
-                # 형태소 분리된 단어의 빈도수가 분리안된 단어의 빈수도의 5% 미만이면 형태소 분리오류
-                (cho, jung, jong) = hgtk.letter.decompose(word[-1])
-                if 'ㄱ' <= jong <= 'ㅎ':
-                    dic_line = "{},,,1000,NNP,*,{},{},*,*,*,*,*".format(word, 'T', word)
-                else:
-                    dic_line = "{},,,1000,NNP,*,{},{},*,*,*,*,*".format(word, 'F', word)
-                print("{}\t{}\t{}\t{}\t{}\t{}".format(word, ' '.join(tokens), ' '.join(soy_tokens), cnt, len(words), jong))
-                f2.writelines(dic_line + '\n')
-                f3.writelines("{}\t{}\t{}\t{}\t{}".format(word, ' '.join(tokens), ' '.join(soy_tokens), cnt, len(words)) + '\n')
+            (cho, jung, jong) = hgtk.letter.decompose(word[-1])
+            if 'ㄱ' <= jong <= 'ㅎ':
+                dic_line = "{},,,,NNP,*,{},{},*,*,*,*,*".format(word, 'T', word)
+            else:
+                dic_line = "{},,,,NNP,*,{},{},*,*,*,*,*".format(word, 'F', word)
+            f2.writelines(dic_line + '\n')
+            f3.writelines("{}\t{}\t{}".format(word, ' '.join(tokens), cnt) + '\n')
 
 
 if __name__ == '__main__':

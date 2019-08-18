@@ -609,6 +609,37 @@ sudo make install
 
 **사용자사전 추출을 자동화하기 위해 몇시간 고민해 보았지만, 어차피 사람이 눈으로 확인을 해야 한다는 결론이 나오는군요.**
 
+```sh
+python3 ~/embedding/preprocess/unsupervised_nlputils.py \
+    --preprocess_mode compute_soy_word_score \
+    --input_path ./item_info.txt \
+    --model_path ./soyword.model
+
+python3 ~/embedding/preprocess/unsupervised_nlputils.py \
+    --preprocess_mode soy_tokenize \
+    --input_path ./item_info.txt \
+    --model_path ./soyword.model \
+    --output_path ./itemname_tokenized_soy.txt
+
+python3 get_frequent_word.py \
+    --input_path itemname_tokenized_soy.txt \
+    --output_path frequent.txt \
+    --log_path log.txt
+
+vi frequent.txt
+
+cp frequent.txt ~/mecab-ko-dic-2.1.1-20180720/user-dic/frequent.csv
+cd ~/mecab-ko-dic-2.1.1-20180720/
+./tools/add-userdic.sh
+
+# 우선순위 올리기
+sed -i -E 's/[0-9]+,NNP/1000,NNP/g' user-frequent.csv
+
+make clean
+make
+sudo make install
+```
+
 ## 후기
 
 형태소분석이 많이 중요하군요.
